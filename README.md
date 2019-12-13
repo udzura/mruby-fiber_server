@@ -1,25 +1,15 @@
-# mruby-fiber_server   [![Build Status](https://travis-ci.org/udzura/mruby-fiber_server.svg?branch=master)](https://travis-ci.org/udzura/mruby-fiber_server)
-FiberServer class
-## install by mrbgems
-- add conf.gem line to `build_config.rb`
+# mruby-fiber_server
 
-```ruby
-MRuby::Build.new do |conf|
+Sample multi prefork worker HTTPD using pure(?) mruby.
 
-    # ... (snip) ...
+## Try it
 
-    conf.gem :github => 'udzura/mruby-fiber_server'
-end
 ```
-## example
-```ruby
-p FiberServer.hi
-#=> "hi!!"
-t = FiberServer.new "hello"
-p t.hello
-#=> "hello"
-p t.bye
-#=> "hello bye"
+$ rake
+$ ./mruby/bin/mruby examples/server.rb 
+
+---
+$ ab -c20 -t30 -n10000000 http://localhost:8880/
 ```
 
 ## License
