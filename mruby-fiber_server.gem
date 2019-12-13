@@ -1,0 +1,7 @@
+name: mruby-fiber_server
+description: FiberServer class
+author: Uchio Kondo
+website: https://github.com/udzura/mruby-fiber_server
+protocol: git
+repository: https://github.com/udzura/mruby-fiber_server.git
+license: MIT
