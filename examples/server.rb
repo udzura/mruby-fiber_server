@@ -1,3 +1,4 @@
+nr = (ARGV[0] || 10).to_i
 $shutdown = false
 sock = TCPServer.new 8880
 def spawn(sock)
@@ -5,6 +6,7 @@ def spawn(sock)
     FiberServer.sigpipe_ign!
     loop do
       client = sock.accept
+      t = Time.now.to_f
       headers = ""
       readloop = true
       err = nil
@@ -36,26 +38,31 @@ def spawn(sock)
       rescue => e
         p e
         puts "Then ignore"
-        next
       end
-      client.close
+      client.close rescue nil
+      puts "Elapsed: #{Time.now.to_f - t}"
     end
   end
 end
 
-workers = (0..9).map do |i|
+workers = (1..nr).map do |i|
   spawn(sock)
 end
 
 loop = FiberedWorker::MainLoop.new
 loop.pids = workers
-loop.register_handler(:INT) do
-  puts "SIGINT:"
+def shutdown(sig, workers)
+  puts "Receive sig: #{sig}"
   $shutdown = true
   workers.each do |worker|
     Process.kill :TERM, worker
   end
 end
+
+loop.register_handler(:INT) {|n| shutdown(n, workers) }
+loop.register_handler(:TERM) {|n| shutdown(n, workers) }
+loop.register_handler(:HUP) {|n| shutdown(n, workers) }
+
 loop.on_worker_exit do |s, r|
   puts "Dead: #{s}, rest process: #{r.inspect}"
 
@@ -66,4 +73,5 @@ loop.on_worker_exit do |s, r|
   end
 end
 
+puts "[#{$$}] Starting server http://localhost:8880/ with #{nr} worker(s)"
 p loop.run
